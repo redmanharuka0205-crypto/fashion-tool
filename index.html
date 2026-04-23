@@ -3,227 +3,442 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>着せ替えプロンプト作成ツール</title>
+<title>はるか大好き❦</title>
 
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont;
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
   background: #f5f4f0;
+  color: #1a1a1a;
   padding: 1rem;
 }
-h1 { font-size: 18px; margin-bottom: 1rem; }
+
+h1 {
+  font-size: 18px;
+  margin-bottom: 1rem;
+}
 
 .section {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 1rem;
   margin-bottom: 10px;
+  border: 0.5px solid #e0ddd6;
 }
 
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip {
-  padding: 6px 10px;
-  border-radius: 20px;
-  border: 1px solid #ccc;
+.label {
+  font-size: 11px;
+  color: #777;
+  font-weight: 700;
+  margin-bottom: 10px;
+  letter-spacing: 0.05em;
+}
+
+.upload-area {
+  border: 1.5px dashed #ccc;
+  border-radius: 12px;
+  padding: 1.4rem;
+  text-align: center;
+  background: #faf9f6;
   cursor: pointer;
 }
-.chip.selected {
-  background: #000;
-  color: #fff;
+
+.upload-area.has-image {
+  border-style: solid;
+  border-color: #111;
 }
 
-textarea, input {
+.upload-area p {
+  font-size: 13px;
+  color: #888;
+  margin-top: 6px;
+}
+
+#preview {
   width: 100%;
-  padding: 10px;
+  max-height: 260px;
+  object-fit: cover;
   border-radius: 10px;
-  border: 1px solid #ccc;
+  display: none;
+  margin-top: 10px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  font-size: 13px;
+  padding: 7px 12px;
+  border-radius: 20px;
+  border: 0.5px solid #d0cdc6;
+  background: #f5f4f0;
+  color: #1a1a1a;
+  cursor: pointer;
+}
+
+.chip.selected {
+  background: #111;
+  color: #fff;
+  border-color: #111;
 }
 
 button {
   width: 100%;
-  padding: 12px;
+  padding: 13px;
   border-radius: 12px;
   border: none;
-  margin-top: 10px;
   font-size: 14px;
+  margin-bottom: 10px;
+  font-family: inherit;
 }
 
-.primary { background: #000; color: #fff; }
-.success { background: #2a7a2a; color: #fff; }
+.primary {
+  background: #111;
+  color: #fff;
+}
 
-#preview {
-  width: 100%;
-  margin-top: 10px;
-  border-radius: 10px;
+.success {
+  background: #2a7a2a;
+  color: #fff;
+}
+
+.sub {
+  background: #fff;
+  border: 0.5px solid #d0cdc6;
+  color: #111;
+}
+
+#resultBox {
   display: none;
+}
+
+.prompt-text {
+  font-size: 12px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
 }
 
 .toast {
   position: fixed;
-  bottom: 20px;
+  bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  background: black;
-  color: white;
-  padding: 10px 16px;
+  background: #111;
+  color: #fff;
+  padding: 10px 18px;
   border-radius: 20px;
+  font-size: 13px;
   display: none;
+  z-index: 999;
 }
 </style>
 </head>
 
 <body>
 
-<h1>👗 着せ替えプロンプト</h1>
+<h1>👗 着せ替えプロンプト作成ツール</h1>
 
 <div class="section">
-  <input type="file" id="file">
+  <div class="label">写真をアップ</div>
+  <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+    <div style="font-size:28px;">📷</div>
+    <p>タップして写真を選ぶ</p>
+  </div>
+  <input type="file" id="fileInput" accept="image/*" style="display:none">
   <img id="preview">
 </div>
 
 <div class="section">
-  <div>変える部分</div>
+  <div class="label">変える部分</div>
   <div class="chips">
-    <div class="chip" data="outfit">服</div>
-    <div class="chip" data="hair">髪</div>
-    <div class="chip" data="makeup">メイク</div>
-    <div class="chip" data="all">全部</div>
+    <div class="chip multi" data-target="change outfit">服</div>
+    <div class="chip multi" data-target="change hairstyle">髪型</div>
+    <div class="chip multi" data-target="refine makeup">メイク</div>
+    <div class="chip multi" data-target="adjust background">背景</div>
+    <div class="chip multi" data-target="change outfit, hairstyle, makeup and overall styling">全部</div>
   </div>
 </div>
 
 <div class="section">
-  <div>スタイル</div>
+  <div class="label">ファッションスタイル</div>
   <div class="chips">
-    <div class="chip" data-style="elegant fashion">綺麗め</div>
-    <div class="chip" data-style="casual outfit">カジュアル</div>
-    <div class="chip" data-style="korean fashion">韓国</div>
+    <div class="chip single" data-group="style" data-value="elegant feminine fashion">綺麗め</div>
+    <div class="chip single" data-group="style" data-value="casual streetwear fashion">カジュアル</div>
+    <div class="chip single" data-group="style" data-value="Korean street fashion">韓国風</div>
+    <div class="chip single" data-group="style" data-value="smart office outfit">オフィス</div>
+    <div class="chip single" data-group="style" data-value="minimal clean fashion">ミニマル</div>
+    <div class="chip single" data-group="style" data-value="date outfit, elegant and charming">デート風</div>
   </div>
 </div>
 
 <div class="section">
-  <div>雰囲気</div>
+  <div class="label">カラートーン</div>
   <div class="chips">
-    <div class="chip" data-mood="soft feminine">やわらかい</div>
-    <div class="chip" data-mood="cool stylish">かっこいい</div>
-    <div class="chip" data-mood="cute charming">かわいい</div>
+    <div class="chip single" data-group="tone" data-value="soft pastel tones, low saturation, gentle impression">ソフトトーン</div>
+    <div class="chip single" data-group="tone" data-value="muted dusty tones, grayish colors, calm impression">グレイッシュ</div>
+    <div class="chip single" data-group="tone" data-value="vivid high saturation colors, bright and lively impression">ビビッド</div>
+    <div class="chip single" data-group="tone" data-value="deep rich colors, dark tones, mature impression">ディープ</div>
+    <div class="chip single" data-group="tone" data-value="light bright tones, high value colors, fresh impression">ライト</div>
   </div>
 </div>
 
 <div class="section">
-  <div>色・服指定</div>
-  <input id="color">
+  <div class="label">配色タイプ</div>
+  <div class="chips">
+    <div class="chip single" data-group="scheme" data-value="monochrome color scheme">モノトーン</div>
+    <div class="chip single" data-group="scheme" data-value="similar color palette, harmonious color coordination">類似色コーデ</div>
+    <div class="chip single" data-group="scheme" data-value="complementary color scheme, stylish contrast">補色コーデ</div>
+    <div class="chip single" data-group="scheme" data-value="neutral base with accent color">ベーシック＋差し色</div>
+  </div>
 </div>
 
 <div class="section">
-  <div>追加要望</div>
-  <textarea id="custom"></textarea>
+  <div class="label">カラー指定</div>
+  <div class="chips">
+    <div class="chip single" data-group="color" data-value="black outfit">黒</div>
+    <div class="chip single" data-group="color" data-value="white outfit">白</div>
+    <div class="chip single" data-group="color" data-value="beige outfit">ベージュ</div>
+    <div class="chip single" data-group="color" data-value="navy outfit">ネイビー</div>
+    <div class="chip single" data-group="color" data-value="brown outfit">ブラウン</div>
+    <div class="chip single" data-group="color" data-value="pink outfit">ピンク</div>
+    <div class="chip single" data-group="color" data-value="red outfit">赤</div>
+    <div class="chip single" data-group="color" data-value="blue outfit">青</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">質感・素材感</div>
+  <div class="chips">
+    <div class="chip single" data-group="texture" data-value="matte soft fabric texture">マット</div>
+    <div class="chip single" data-group="texture" data-value="glossy shiny fabric texture">ツヤ感</div>
+    <div class="chip single" data-group="texture" data-value="natural cotton and linen texture">ナチュラル素材</div>
+    <div class="chip single" data-group="texture" data-value="luxury silk and satin texture">高級素材</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">仕上がり方向</div>
+  <div class="chips">
+    <div class="chip single" data-group="finish" data-value="natural and clean look">ナチュラル</div>
+    <div class="chip single" data-group="finish" data-value="cute feminine look">可愛い</div>
+    <div class="chip single" data-group="finish" data-value="cool stylish look">かっこいい</div>
+    <div class="chip single" data-group="finish" data-value="elegant classy look">上品</div>
+    <div class="chip single" data-group="finish" data-value="soft and gentle atmosphere">やわらかい</div>
+  </div>
 </div>
 
 <div class="section">
   <label>
     <input type="checkbox" id="faceLock" checked>
-    顔固定モード（おすすめ）
+    顔固定モード
   </label>
 </div>
 
-<button class="primary" onclick="generate()">生成してコピー</button>
+<button class="primary" onclick="generatePrompt()">プロンプト作成して自動コピー</button>
 
-<div class="section">
-  <div id="result"></div>
+<div class="section" id="resultBox">
+  <div class="label">生成プロンプト</div>
+  <div class="prompt-text" id="result"></div>
 </div>
 
-<button class="success" onclick="openSeaArt()">SeaArtで開く</button>
+<button class="sub" onclick="copyPrompt()">もう一度コピー</button>
+<button class="success" onclick="openFlow()">Flowで開く →</button>
 
 <div class="toast" id="toast"></div>
 
 <script>
-let state = {
-  targets: [],
-  style: '',
-  mood: ''
+let imageLoaded = false;
+
+const state = {
+  style: "",
+  tone: "",
+  scheme: "",
+  color: "",
+  texture: "",
+  finish: ""
 };
 
-document.getElementById('file').onchange = e => {
-  let f = e.target.files[0];
-  let r = new FileReader();
-  r.onload = ev => {
-    let img = document.getElementById('preview');
+const FLOW_URL = "https://labs.google/fx/ja/tools/flow/project/d03d6b88-ee08-46c6-9050-ac6f06849887";
+
+document.getElementById("fileInput").addEventListener("change", function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const img = document.getElementById("preview");
     img.src = ev.target.result;
-    img.style.display = 'block';
+    img.style.display = "block";
+
+    imageLoaded = true;
+    document.getElementById("uploadArea").classList.add("has-image");
+    document.querySelector("#uploadArea p").textContent = "画像を変更するにはタップ";
+    showToast("画像を読み込みました");
   };
-  r.readAsDataURL(f);
-};
-
-document.querySelectorAll('[data]').forEach(el=>{
-  el.onclick=()=>{
-    el.classList.toggle('selected');
-  }
+  reader.readAsDataURL(file);
 });
 
-document.querySelectorAll('[data-style]').forEach(el=>{
-  el.onclick=()=>{
-    document.querySelectorAll('[data-style]').forEach(c=>c.classList.remove('selected'));
-    el.classList.add('selected');
-    state.style = el.getAttribute('data-style');
-  }
-});
+document.querySelectorAll(".multi").forEach(chip => {
+  chip.addEventListener("click", function() {
+    const isAll = this.dataset.target.includes("overall styling");
 
-document.querySelectorAll('[data-mood]').forEach(el=>{
-  el.onclick=()=>{
-    document.querySelectorAll('[data-mood]').forEach(c=>c.classList.remove('selected'));
-    el.classList.add('selected');
-    state.mood = el.getAttribute('data-mood');
-  }
-});
-
-function generate(){
-
-  let targets = [];
-  document.querySelectorAll('[data].selected').forEach(el=>{
-    targets.push(el.getAttribute('data'));
+    if (isAll) {
+      const selected = this.classList.contains("selected");
+      document.querySelectorAll(".multi").forEach(c => c.classList.remove("selected"));
+      if (!selected) this.classList.add("selected");
+    } else {
+      const allChip = Array.from(document.querySelectorAll(".multi"))
+        .find(c => c.dataset.target.includes("overall styling"));
+      if (allChip) allChip.classList.remove("selected");
+      this.classList.toggle("selected");
+    }
   });
+});
 
-  let color = document.getElementById('color').value;
-  let custom = document.getElementById('custom').value;
-  let faceLock = document.getElementById('faceLock').checked;
+document.querySelectorAll(".single").forEach(chip => {
+  chip.addEventListener("click", function() {
+    const group = this.dataset.group;
 
-  let prompt = `
-best quality, ultra realistic photo, high detail, photorealistic,
-${faceLock ? "same person, preserve identity, keep original face, no face change," : ""}
+    if (this.classList.contains("selected")) {
+      this.classList.remove("selected");
+      state[group] = "";
+      return;
+    }
 
-${targets.join(', ')},
-${state.style},
-${state.mood},
-${color},
-${custom},
+    document.querySelectorAll(`.single[data-group="${group}"]`).forEach(c => c.classList.remove("selected"));
+    this.classList.add("selected");
+    state[group] = this.dataset.value;
+  });
+});
 
-natural lighting, realistic skin, sharp focus
-  `;
-
-  let negative = `
-low quality, blurry, bad anatomy, deformed face,
-different person, identity loss,
-extra fingers, extra limbs, distorted body
-  `;
-
-  let final = prompt + "\n\nNegative:\n" + negative;
-
-  document.getElementById('result').innerText = final;
-
-  navigator.clipboard.writeText(final);
-  show("コピーした！");
+function getTargets() {
+  const targets = [];
+  document.querySelectorAll(".multi.selected").forEach(chip => {
+    targets.push(chip.dataset.target);
+  });
+  return targets;
 }
 
-function openSeaArt(){
-  window.open("https://www.seaart.ai/tools/img2img");
+function generatePrompt() {
+  const targets = getTargets();
+
+  if (!imageLoaded) {
+    showToast("先に写真を選んでください");
+    return;
+  }
+
+  if (targets.length === 0) {
+    showToast("変える部分を選んでください");
+    return;
+  }
+
+  const faceLock = document.getElementById("faceLock").checked;
+
+  const promptParts = [
+    "best quality",
+    "ultra realistic photo",
+    "high detail",
+    "photorealistic",
+    faceLock ? "same person, preserve identity, keep original face, no face change" : "",
+    targets.join(", "),
+    state.style,
+    state.tone,
+    state.scheme,
+    state.color,
+    state.texture,
+    state.finish,
+    "balanced color coordination",
+    "professional fashion styling",
+    "natural lighting",
+    "realistic skin texture",
+    "sharp focus"
+  ].filter(Boolean);
+
+  const negativeParts = [
+    "low quality",
+    "blurry",
+    "bad anatomy",
+    "deformed face",
+    "different person",
+    "identity loss",
+    "face change",
+    "extra fingers",
+    "extra limbs",
+    "distorted body",
+    "plastic skin",
+    "overedited skin",
+    "watermark",
+    "text",
+    "logo"
+  ];
+
+  const finalText =
+`Prompt:
+${promptParts.join(", ")}
+
+Negative:
+${negativeParts.join(", ")}`;
+
+  document.getElementById("result").textContent = finalText;
+  document.getElementById("resultBox").style.display = "block";
+
+  copyText(finalText);
+  showToast("プロンプトを自動コピーしました");
 }
 
-function show(t){
-  let el = document.getElementById('toast');
-  el.innerText = t;
-  el.style.display='block';
-  setTimeout(()=>el.style.display='none',2000);
+function copyPrompt() {
+  const text = document.getElementById("result").textContent;
+  if (!text) {
+    showToast("先にプロンプトを作ってください");
+    return;
+  }
+  copyText(text);
+  showToast("コピーしました");
+}
+
+function openFlow() {
+  const text = document.getElementById("result").textContent;
+  if (!text) {
+    showToast("先にプロンプトを作ってください");
+    return;
+  }
+
+  copyText(text);
+  window.open(FLOW_URL, "_blank");
+}
+
+function copyText(text) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand("copy");
+  document.body.removeChild(ta);
+}
+
+function showToast(msg) {
+  const toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.style.display = "block";
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => {
+    toast.style.display = "none";
+  }, 2200);
 }
 </script>
 
