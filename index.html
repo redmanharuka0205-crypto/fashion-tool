@@ -207,9 +207,10 @@ ${styleHint}
     if (data.error) throw new Error(data.error.message);
 
 let raw = data.candidates[0].content.parts[0].text;
+console.log('Gemini raw response:', raw);
 raw = raw.replace(/```json/g, '').replace(/```/g, '').trim();
 const jsonMatch = raw.match(/\{[\s\S]*\}/);
-if (!jsonMatch) throw new Error('JSONが見つかりません');
+if (!jsonMatch) throw new Error('JSONが見つかりません: ' + raw.substring(0, 100));
 const result = JSON.parse(jsonMatch[0]);
 
     document.getElementById('analysis-box').style.display = 'block';
