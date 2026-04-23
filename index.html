@@ -3,447 +3,229 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>プロンプトF</title>
+<title>着せ替えプロンプト作成ツール</title>
+
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif;
-    background: #f5f4f0;
-    color: #1a1a1a;
-    padding: 1rem;
-  }
-  h1 { font-size: 18px; font-weight: 700; margin-bottom: 1rem; }
-  .section, .prompt-box {
-    background: #fff;
-    border-radius: 14px;
-    padding: 1rem;
-    margin-bottom: 0.8rem;
-    border: 0.5px solid #e0ddd6;
-  }
-  .section-label, .prompt-label {
-    font-size: 11px;
-    color: #888;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    margin-bottom: 10px;
-  }
-  .upload-area {
-    border: 1.5px dashed #d0cdc6;
-    border-radius: 12px;
-    padding: 1.4rem;
-    text-align: center;
-    cursor: pointer;
-    background: #f9f8f5;
-  }
-  .upload-area.has-image { border-style: solid; border-color: #1a1a1a; }
-  .upload-area p { font-size: 13px; color: #888; margin-top: 6px; }
-  #preview { width: 100%; border-radius: 10px; display: none; margin-top: 0.8rem; max-height: 260px; object-fit: cover; }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip { font-size: 13px; padding: 7px 12px; border-radius: 20px; border: 0.5px solid #d0cdc6; background: #f5f4f0; color: #1a1a1a; cursor: pointer; }
-  .chip.selected { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
-  .text-input, .textarea {
-    width: 100%;
-    border: 0.5px solid #d0cdc6;
-    border-radius: 12px;
-    padding: 12px 14px;
-    font-size: 14px;
-    font-family: inherit;
-    background: #fff;
-    color: #1a1a1a;
-    outline: none;
-  }
-  .textarea { min-height: 88px; resize: vertical; }
-  .text-input:focus, .textarea:focus { border-color: #1a1a1a; }
-  .btn-row { display: flex; gap: 8px; margin-bottom: 0.8rem; }
-  .btn {
-    flex: 1;
-    padding: 12px;
-    border-radius: 12px;
-    border: 0.5px solid #d0cdc6;
-    background: #fff;
-    color: #1a1a1a;
-    font-size: 14px;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  .btn.primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
-  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-  .prompt-text, .negative-text {
-    font-size: 12px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    line-height: 1.65;
-    word-break: break-word;
-    white-space: pre-wrap;
-  }
-  .prompt-text { color: #333; min-height: 60px; }
-  .neg-label { font-size: 10px; color: #bbb; letter-spacing: 0.05em; margin: 12px 0 5px; }
-  .negative-text { color: #888; padding-top: 8px; border-top: 0.5px solid #e0ddd6; }
-  .guide-box {
-    background: #fff9e6;
-    border-radius: 12px;
-    padding: 0.9rem;
-    margin-bottom: 0.8rem;
-    border: 0.5px solid #f0d060;
-    display: none;
-  }
-  .guide-box p { font-size: 13px; color: #7a6000; line-height: 1.8; }
-  .sub-note { font-size: 12px; color: #888; margin-top: 8px; line-height: 1.6; }
-  .mini-note { font-size: 11px; color: #999; margin-top: 8px; line-height: 1.6; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont;
+  background: #f5f4f0;
+  padding: 1rem;
+}
+h1 { font-size: 18px; margin-bottom: 1rem; }
 
-  /* サービスボタン */
-  .service-section { background: #fff; border-radius: 14px; padding: 1rem; margin-bottom: 0.8rem; border: 0.5px solid #e0ddd6; display: none; }
-  .service-label { font-size: 11px; color: #888; font-weight: 700; letter-spacing: 0.06em; margin-bottom: 10px; }
-  .service-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .service-card {
-    border-radius: 12px;
-    border: 0.5px solid #d0cdc6;
-    padding: 10px;
-    cursor: pointer;
-    background: #fff;
-    font-family: inherit;
-    text-align: left;
-  }
-  .service-card:active { background: #f5f4f0; }
-  .service-name { font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
-  .service-credit-row { display: flex; align-items: center; gap: 6px; }
-  .service-credit-input {
-    width: 52px;
-    border: 0.5px solid #d0cdc6;
-    border-radius: 8px;
-    padding: 4px 6px;
-    font-size: 12px;
-    font-family: inherit;
-    background: #f9f8f5;
-    color: #1a1a1a;
-    outline: none;
-    text-align: center;
-  }
-  .service-credit-input:focus { border-color: #1a1a1a; }
-  .credit-label { font-size: 11px; color: #888; }
-  .credit-warn { font-size: 11px; color: #c0392b; font-weight: 600; display: none; }
+.section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 10px;
+}
 
-  .toast {
-    position: fixed;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%) translateY(60px);
-    background: #1a1a1a;
-    color: #fff;
-    padding: 10px 18px;
-    border-radius: 20px;
-    font-size: 13px;
-    transition: transform 0.2s;
-    pointer-events: none;
-    z-index: 999;
-    max-width: 92vw;
-    text-align: center;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  padding: 6px 10px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+.chip.selected {
+  background: #000;
+  color: #fff;
+}
+
+textarea, input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.primary { background: #000; color: #fff; }
+.success { background: #2a7a2a; color: #fff; }
+
+#preview {
+  width: 100%;
+  margin-top: 10px;
+  border-radius: 10px;
+  display: none;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: black;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 20px;
+  display: none;
+}
 </style>
 </head>
+
 <body>
 
-<h1>👗 プロンプトF</h1>
+<h1>👗 着せ替えプロンプト</h1>
 
 <div class="section">
-  <div class="section-label">写真をアップ</div>
-  <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
-    <div style="font-size:28px;">📷</div>
-    <p>タップして写真を選ぶ</p>
-  </div>
-  <input type="file" id="file-input" accept="image/*" style="display:none">
-  <img id="preview" alt="プレビュー">
+  <input type="file" id="file">
+  <img id="preview">
 </div>
 
 <div class="section">
-  <div class="section-label">何を変える？（複数OK）</div>
+  <div>変える部分</div>
   <div class="chips">
-    <button class="chip" data-cat="target" data-val="outfit">服・コーデ</button>
-    <button class="chip" data-cat="target" data-val="makeup">メイク</button>
-    <button class="chip" data-cat="target" data-val="hair">髪型</button>
-    <button class="chip" data-cat="target" data-val="background">背景</button>
-    <button class="chip" data-cat="target" data-val="all">全部</button>
+    <div class="chip" data="outfit">服</div>
+    <div class="chip" data="hair">髪</div>
+    <div class="chip" data="makeup">メイク</div>
+    <div class="chip" data="all">全部</div>
   </div>
 </div>
 
 <div class="section">
-  <div class="section-label">スタイル</div>
+  <div>スタイル</div>
   <div class="chips">
-    <button class="chip" data-cat="style" data-val="casual streetwear">カジュアル</button>
-    <button class="chip" data-cat="style" data-val="chic feminine fashion">フェミニン</button>
-    <button class="chip" data-cat="style" data-val="smart office outfit">オフィス</button>
-    <button class="chip" data-cat="style" data-val="sporty athletic wear">スポーツ</button>
-    <button class="chip" data-cat="style" data-val="vintage retro style">ヴィンテージ</button>
-    <button class="chip" data-cat="style" data-val="minimal clean look">ミニマル</button>
-    <button class="chip" data-cat="style" data-val="Korean street fashion">韓国風</button>
-    <button class="chip" data-cat="style" data-val="elegant date look">デート風</button>
+    <div class="chip" data-style="elegant fashion">綺麗め</div>
+    <div class="chip" data-style="casual outfit">カジュアル</div>
+    <div class="chip" data-style="korean fashion">韓国</div>
   </div>
 </div>
 
 <div class="section">
-  <div class="section-label">雰囲気</div>
+  <div>雰囲気</div>
   <div class="chips">
-    <button class="chip" data-cat="mood" data-val="soft and gentle atmosphere">やわらかい</button>
-    <button class="chip" data-cat="mood" data-val="clean and classy mood">上品</button>
-    <button class="chip" data-cat="mood" data-val="cute and charming vibe">可愛い</button>
-    <button class="chip" data-cat="mood" data-val="cool and stylish vibe">かっこいい</button>
-    <button class="chip" data-cat="mood" data-val="natural everyday mood">自然体</button>
+    <div class="chip" data-mood="soft feminine">やわらかい</div>
+    <div class="chip" data-mood="cool stylish">かっこいい</div>
+    <div class="chip" data-mood="cute charming">かわいい</div>
   </div>
 </div>
 
 <div class="section">
-  <div class="section-label">色や服の指定（任意）</div>
-  <input type="text" id="color-input" class="text-input" placeholder="例：黒、白、ベージュ、ネイビー">
-  <div class="mini-note">例：黒ワンピ、白ブラウス、ベージュコート など</div>
+  <div>色・服指定</div>
+  <input id="color">
 </div>
 
 <div class="section">
-  <div class="section-label">追加したい内容（任意）</div>
-  <textarea id="custom-input" class="textarea" placeholder="例：露出控えめ、清楚、大人っぽく、ロングヘア、自然なメイク"></textarea>
+  <div>追加要望</div>
+  <textarea id="custom"></textarea>
 </div>
 
-<div class="btn-row">
-  <button class="btn primary" id="generate-btn" onclick="generatePrompt()" disabled>プロンプト作成して自動コピー</button>
+<div class="section">
+  <label>
+    <input type="checkbox" id="faceLock" checked>
+    顔固定モード（おすすめ）
+  </label>
 </div>
 
-<div class="prompt-box" id="prompt-box" style="display:none;">
-  <div class="prompt-label">生成プロンプト</div>
-  <div class="prompt-text" id="prompt-display"></div>
-  <div class="neg-label">ネガティブプロンプト</div>
-  <div class="negative-text" id="negative-display"></div>
+<button class="primary" onclick="generate()">生成してコピー</button>
+
+<div class="section">
+  <div id="result"></div>
 </div>
 
-<div class="guide-box" id="guide-box">
-  <p>
-    ✅ <strong>プロンプトをコピーしました！</strong><br><br>
-    下のサービスを選んでタップ👇<br>
-    img2imgに写真をアップして貼り付けて生成！
-  </p>
-</div>
-
-<!-- サービス選択 -->
-<div class="service-section" id="service-section">
-  <div class="service-label">どこで生成する？（クレジット残量メモ）</div>
-  <div class="service-grid" id="service-grid"></div>
-</div>
-
-<div class="btn-row" id="copy-btn-row" style="display:none;">
-  <button class="btn" onclick="copyPrompt()">もう一度コピー</button>
-</div>
+<button class="success" onclick="openSeaArt()">SeaArtで開く</button>
 
 <div class="toast" id="toast"></div>
 
 <script>
-let imageLoaded = false;
-const state = { targets: new Set(), style: null, mood: null };
+let state = {
+  targets: [],
+  style: '',
+  mood: ''
+};
 
-const DEFAULT_NEGATIVE = 'low quality, blurry, deformed, bad anatomy, extra fingers, extra limbs, distorted face, overedited skin, unrealistic body, duplicate, watermark, text, logo, cropped, out of frame';
-
-const SERVICES = [
-  { id: 'seaart',    name: 'SeaArt',      url: 'https://www.seaart.ai/tools/img2img',                         defaultCredit: 50  },
-  { id: 'leonardo',  name: 'Leonardo AI', url: 'https://app.leonardo.ai/',                                    defaultCredit: 150 },
-  { id: 'yeri',      name: 'yeri.ai',     url: 'https://yeri.ai/ja/app/image-to-image',                       defaultCredit: 9   },
-  { id: 'nightcafe', name: 'NightCafe',   url: 'https://creator.nightcafe.studio/create/img2img',             defaultCredit: 5   },
-];
-
-// クレジット読み込み
-function loadCredits() {
-  const saved = localStorage.getItem('service_credits');
-  return saved ? JSON.parse(saved) : {};
-}
-
-function saveCredits(credits) {
-  localStorage.setItem('service_credits', JSON.stringify(credits));
-}
-
-// サービスカード生成
-function buildServiceCards() {
-  const credits = loadCredits();
-  const grid = document.getElementById('service-grid');
-  grid.innerHTML = '';
-
-  SERVICES.forEach(svc => {
-    const current = credits[svc.id] !== undefined ? credits[svc.id] : svc.defaultCredit;
-    const isLow = current <= 3;
-
-    const card = document.createElement('div');
-    card.className = 'service-card';
-    card.innerHTML = `
-      <div class="service-name">${svc.name}</div>
-      <div class="service-credit-row">
-        <input type="number" class="service-credit-input" id="credit-${svc.id}" value="${current}" min="0" max="9999">
-        <span class="credit-label">クレジット</span>
-      </div>
-      <div class="credit-warn" id="warn-${svc.id}" style="${isLow ? 'display:block' : 'display:none'}">残量少ない！</div>
-    `;
-
-    // クレジット変更時に保存
-    card.querySelector(`#credit-${svc.id}`).addEventListener('input', (e) => {
-      e.stopPropagation();
-      const val = parseInt(e.target.value) || 0;
-      const allCredits = loadCredits();
-      allCredits[svc.id] = val;
-      saveCredits(allCredits);
-      document.getElementById(`warn-${svc.id}`).style.display = val <= 3 ? 'block' : 'none';
-    });
-
-    // カードタップでサービスを開く
-    card.addEventListener('click', (e) => {
-      if (e.target.tagName === 'INPUT') return;
-      copyPrompt();
-      window.open(svc.url, '_blank');
-    });
-
-    grid.appendChild(card);
-  });
-}
-
-document.getElementById('file-input').addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  if (!file.type.startsWith('image/')) { showToast('画像ファイルを選んでください'); return; }
-  try {
-    const dataUrl = await readFileAsDataURL(file);
-    const preview = document.getElementById('preview');
-    preview.src = dataUrl;
-    preview.style.display = 'block';
-    document.getElementById('upload-area').classList.add('has-image');
-    document.querySelector('#upload-area p').textContent = '画像を変更するにはタップ';
-    imageLoaded = true;
-    resetOutput();
-    checkReady();
-    showToast('画像を読み込みました');
-  } catch (e) { showToast('画像の読み込みに失敗しました'); }
-});
-
-document.querySelectorAll('[data-cat="target"]').forEach(chip => {
-  chip.addEventListener('click', () => {
-    const val = chip.dataset.val;
-    const allChip = document.querySelector('[data-cat="target"][data-val="all"]');
-    if (val === 'all') {
-      if (state.targets.has('all')) { state.targets.clear(); allChip.classList.remove('selected'); }
-      else {
-        state.targets.clear();
-        document.querySelectorAll('[data-cat="target"]').forEach(c => c.classList.remove('selected'));
-        state.targets.add('all'); allChip.classList.add('selected');
-      }
-    } else {
-      if (state.targets.has('all')) { state.targets.delete('all'); allChip.classList.remove('selected'); }
-      if (state.targets.has(val)) { state.targets.delete(val); chip.classList.remove('selected'); }
-      else { state.targets.add(val); chip.classList.add('selected'); }
-    }
-    resetOutput(); checkReady();
-  });
-});
-
-document.querySelectorAll('[data-cat="style"]').forEach(chip => {
-  chip.addEventListener('click', () => {
-    if (state.style === chip.dataset.val) { state.style = null; chip.classList.remove('selected'); }
-    else { document.querySelectorAll('[data-cat="style"]').forEach(c => c.classList.remove('selected')); state.style = chip.dataset.val; chip.classList.add('selected'); }
-    resetOutput();
-  });
-});
-
-document.querySelectorAll('[data-cat="mood"]').forEach(chip => {
-  chip.addEventListener('click', () => {
-    if (state.mood === chip.dataset.val) { state.mood = null; chip.classList.remove('selected'); }
-    else { document.querySelectorAll('[data-cat="mood"]').forEach(c => c.classList.remove('selected')); state.mood = chip.dataset.val; chip.classList.add('selected'); }
-    resetOutput();
-  });
-});
-
-document.getElementById('color-input').addEventListener('input', resetOutput);
-document.getElementById('custom-input').addEventListener('input', resetOutput);
-
-function checkReady() {
-  document.getElementById('generate-btn').disabled = !(imageLoaded && state.targets.size > 0);
-}
-
-function resetOutput() {
-  document.getElementById('prompt-box').style.display = 'none';
-  document.getElementById('guide-box').style.display = 'none';
-  document.getElementById('service-section').style.display = 'none';
-  document.getElementById('copy-btn-row').style.display = 'none';
-  document.getElementById('prompt-display').textContent = '';
-  document.getElementById('negative-display').textContent = DEFAULT_NEGATIVE;
-}
-
-function mapTargetsToPrompt(targets) {
-  const map = {
-    outfit: 'change outfit and styling',
-    makeup: 'refine makeup',
-    hair: 'change hairstyle',
-    background: 'adjust background',
-    all: 'change outfit, hairstyle, makeup, and overall styling'
+document.getElementById('file').onchange = e => {
+  let f = e.target.files[0];
+  let r = new FileReader();
+  r.onload = ev => {
+    let img = document.getElementById('preview');
+    img.src = ev.target.result;
+    img.style.display = 'block';
   };
-  return targets.map(t => map[t] || t);
-}
+  r.readAsDataURL(f);
+};
 
-function buildPrompt() {
-  const targets = [...state.targets];
-  const targetPrompt = mapTargetsToPrompt(targets).join(', ');
-  const style = state.style || 'realistic fashionable styling';
-  const mood = state.mood || 'natural and flattering atmosphere';
-  const colorText = document.getElementById('color-input').value.trim();
-  const customText = document.getElementById('custom-input').value.trim();
-  const colorPrompt = colorText ? `${colorText} color palette` : '';
-  return [
-    'best quality', 'realistic photo', 'high detail',
-    'preserve the same person', 'keep facial identity',
-    'natural skin texture', 'balanced lighting', 'clean composition',
-    targetPrompt, style, mood, colorPrompt, customText
-  ].filter(Boolean).join(', ');
-}
-
-async function generatePrompt() {
-  if (!imageLoaded) { showToast('先に画像を入れてください'); return; }
-  if (state.targets.size === 0) { showToast('何を変えるか選んでください'); return; }
-
-  const prompt = buildPrompt();
-  document.getElementById('prompt-display').textContent = prompt;
-  document.getElementById('negative-display').textContent = DEFAULT_NEGATIVE;
-  document.getElementById('prompt-box').style.display = 'block';
-  document.getElementById('guide-box').style.display = 'block';
-  document.getElementById('copy-btn-row').style.display = 'flex';
-
-  buildServiceCards();
-  document.getElementById('service-section').style.display = 'block';
-
-  await copyText(prompt);
-  showToast('プロンプトを自動コピーしました！');
-}
-
-async function copyPrompt() {
-  const text = document.getElementById('prompt-display').textContent;
-  if (!text) { showToast('先にプロンプトを作成してください'); return; }
-  await copyText(text);
-  showToast('コピーしました！');
-}
-
-function readFileAsDataURL(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = ev => resolve(ev.target.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-async function copyText(text) {
-  try { await navigator.clipboard.writeText(text); }
-  catch (e) {
-    const ta = document.createElement('textarea');
-    ta.value = text; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
+document.querySelectorAll('[data]').forEach(el=>{
+  el.onclick=()=>{
+    el.classList.toggle('selected');
   }
+});
+
+document.querySelectorAll('[data-style]').forEach(el=>{
+  el.onclick=()=>{
+    document.querySelectorAll('[data-style]').forEach(c=>c.classList.remove('selected'));
+    el.classList.add('selected');
+    state.style = el.getAttribute('data-style');
+  }
+});
+
+document.querySelectorAll('[data-mood]').forEach(el=>{
+  el.onclick=()=>{
+    document.querySelectorAll('[data-mood]').forEach(c=>c.classList.remove('selected'));
+    el.classList.add('selected');
+    state.mood = el.getAttribute('data-mood');
+  }
+});
+
+function generate(){
+
+  let targets = [];
+  document.querySelectorAll('[data].selected').forEach(el=>{
+    targets.push(el.getAttribute('data'));
+  });
+
+  let color = document.getElementById('color').value;
+  let custom = document.getElementById('custom').value;
+  let faceLock = document.getElementById('faceLock').checked;
+
+  let prompt = `
+best quality, ultra realistic photo, high detail, photorealistic,
+${faceLock ? "same person, preserve identity, keep original face, no face change," : ""}
+
+${targets.join(', ')},
+${state.style},
+${state.mood},
+${color},
+${custom},
+
+natural lighting, realistic skin, sharp focus
+  `;
+
+  let negative = `
+low quality, blurry, bad anatomy, deformed face,
+different person, identity loss,
+extra fingers, extra limbs, distorted body
+  `;
+
+  let final = prompt + "\n\nNegative:\n" + negative;
+
+  document.getElementById('result').innerText = final;
+
+  navigator.clipboard.writeText(final);
+  show("コピーした！");
 }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  clearTimeout(showToast._timer);
-  showToast._timer = setTimeout(() => t.classList.remove('show'), 2500);
+function openSeaArt(){
+  window.open("https://www.seaart.ai/tools/img2img");
+}
+
+function show(t){
+  let el = document.getElementById('toast');
+  el.innerText = t;
+  el.style.display='block';
+  setTimeout(()=>el.style.display='none',2000);
 }
 </script>
+
 </body>
 </html>
