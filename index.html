@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>着せ替えプロンプト作成ツール</title>
+<title>プロンプトF</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -12,11 +12,7 @@
     color: #1a1a1a;
     padding: 1rem;
   }
-  h1 {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 1rem;
-  }
+  h1 { font-size: 18px; font-weight: 700; margin-bottom: 1rem; }
   .section, .prompt-box {
     background: #fff;
     border-radius: 14px;
@@ -39,47 +35,12 @@
     cursor: pointer;
     background: #f9f8f5;
   }
-  .upload-area.has-image {
-    border-style: solid;
-    border-color: #1a1a1a;
-  }
-  .upload-area p {
-    font-size: 13px;
-    color: #888;
-    margin-top: 6px;
-  }
-  #preview {
-    width: 100%;
-    border-radius: 10px;
-    display: none;
-    margin-top: 0.8rem;
-    max-height: 260px;
-    object-fit: cover;
-  }
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .chip {
-    font-size: 13px;
-    padding: 7px 12px;
-    border-radius: 20px;
-    border: 0.5px solid #d0cdc6;
-    background: #f5f4f0;
-    color: #1a1a1a;
-    cursor: pointer;
-  }
-  .chip.selected {
-    background: #1a1a1a;
-    color: #fff;
-    border-color: #1a1a1a;
-  }
-  .grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
+  .upload-area.has-image { border-style: solid; border-color: #1a1a1a; }
+  .upload-area p { font-size: 13px; color: #888; margin-top: 6px; }
+  #preview { width: 100%; border-radius: 10px; display: none; margin-top: 0.8rem; max-height: 260px; object-fit: cover; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 13px; padding: 7px 12px; border-radius: 20px; border: 0.5px solid #d0cdc6; background: #f5f4f0; color: #1a1a1a; cursor: pointer; }
+  .chip.selected { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
   .text-input, .textarea {
     width: 100%;
     border: 0.5px solid #d0cdc6;
@@ -91,18 +52,9 @@
     color: #1a1a1a;
     outline: none;
   }
-  .textarea {
-    min-height: 88px;
-    resize: vertical;
-  }
-  .text-input:focus, .textarea:focus {
-    border-color: #1a1a1a;
-  }
-  .btn-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 0.8rem;
-  }
+  .textarea { min-height: 88px; resize: vertical; }
+  .text-input:focus, .textarea:focus { border-color: #1a1a1a; }
+  .btn-row { display: flex; gap: 8px; margin-bottom: 0.8rem; }
   .btn {
     flex: 1;
     padding: 12px;
@@ -114,20 +66,8 @@
     cursor: pointer;
     font-family: inherit;
   }
-  .btn.primary {
-    background: #1a1a1a;
-    color: #fff;
-    border-color: #1a1a1a;
-  }
-  .btn.success {
-    background: #2a7a2a;
-    color: #fff;
-    border-color: #2a7a2a;
-  }
-  .btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
+  .btn.primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
   .prompt-text, .negative-text {
     font-size: 12px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -135,21 +75,9 @@
     word-break: break-word;
     white-space: pre-wrap;
   }
-  .prompt-text {
-    color: #333;
-    min-height: 60px;
-  }
-  .neg-label {
-    font-size: 10px;
-    color: #bbb;
-    letter-spacing: 0.05em;
-    margin: 12px 0 5px;
-  }
-  .negative-text {
-    color: #888;
-    padding-top: 8px;
-    border-top: 0.5px solid #e0ddd6;
-  }
+  .prompt-text { color: #333; min-height: 60px; }
+  .neg-label { font-size: 10px; color: #bbb; letter-spacing: 0.05em; margin: 12px 0 5px; }
+  .negative-text { color: #888; padding-top: 8px; border-top: 0.5px solid #e0ddd6; }
   .guide-box {
     background: #fff9e6;
     border-radius: 12px;
@@ -158,23 +86,42 @@
     border: 0.5px solid #f0d060;
     display: none;
   }
-  .guide-box p {
-    font-size: 13px;
-    color: #7a6000;
-    line-height: 1.8;
+  .guide-box p { font-size: 13px; color: #7a6000; line-height: 1.8; }
+  .sub-note { font-size: 12px; color: #888; margin-top: 8px; line-height: 1.6; }
+  .mini-note { font-size: 11px; color: #999; margin-top: 8px; line-height: 1.6; }
+
+  /* サービスボタン */
+  .service-section { background: #fff; border-radius: 14px; padding: 1rem; margin-bottom: 0.8rem; border: 0.5px solid #e0ddd6; display: none; }
+  .service-label { font-size: 11px; color: #888; font-weight: 700; letter-spacing: 0.06em; margin-bottom: 10px; }
+  .service-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .service-card {
+    border-radius: 12px;
+    border: 0.5px solid #d0cdc6;
+    padding: 10px;
+    cursor: pointer;
+    background: #fff;
+    font-family: inherit;
+    text-align: left;
   }
-  .sub-note {
+  .service-card:active { background: #f5f4f0; }
+  .service-name { font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+  .service-credit-row { display: flex; align-items: center; gap: 6px; }
+  .service-credit-input {
+    width: 52px;
+    border: 0.5px solid #d0cdc6;
+    border-radius: 8px;
+    padding: 4px 6px;
     font-size: 12px;
-    color: #888;
-    margin-top: 8px;
-    line-height: 1.6;
+    font-family: inherit;
+    background: #f9f8f5;
+    color: #1a1a1a;
+    outline: none;
+    text-align: center;
   }
-  .mini-note {
-    font-size: 11px;
-    color: #999;
-    margin-top: 8px;
-    line-height: 1.6;
-  }
+  .service-credit-input:focus { border-color: #1a1a1a; }
+  .credit-label { font-size: 11px; color: #888; }
+  .credit-warn { font-size: 11px; color: #c0392b; font-weight: 600; display: none; }
+
   .toast {
     position: fixed;
     bottom: 2rem;
@@ -191,14 +138,12 @@
     max-width: 92vw;
     text-align: center;
   }
-  .toast.show {
-    transform: translateX(-50%) translateY(0);
-  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
-<h1>👗 着せ替えプロンプト作成ツール</h1>
+<h1>👗 プロンプトF</h1>
 
 <div class="section">
   <div class="section-label">写真をアップ</div>
@@ -208,7 +153,6 @@
   </div>
   <input type="file" id="file-input" accept="image/*" style="display:none">
   <img id="preview" alt="プレビュー">
-  <div class="sub-note">※ この版は画像をAI解析しません。選択内容からプロンプトを自動作成します。</div>
 </div>
 
 <div class="section">
@@ -255,7 +199,7 @@
 
 <div class="section">
   <div class="section-label">追加したい内容（任意）</div>
-  <textarea id="custom-input" class="textarea" placeholder="例：露出控えめ、清楚、大人っぽく、ロングヘア、自然なメイク、本人の雰囲気は維持"></textarea>
+  <textarea id="custom-input" class="textarea" placeholder="例：露出控えめ、清楚、大人っぽく、ロングヘア、自然なメイク"></textarea>
 </div>
 
 <div class="btn-row">
@@ -265,7 +209,6 @@
 <div class="prompt-box" id="prompt-box" style="display:none;">
   <div class="prompt-label">生成プロンプト</div>
   <div class="prompt-text" id="prompt-display"></div>
-
   <div class="neg-label">ネガティブプロンプト</div>
   <div class="negative-text" id="negative-display"></div>
 </div>
@@ -273,43 +216,92 @@
 <div class="guide-box" id="guide-box">
   <p>
     ✅ <strong>プロンプトをコピーしました！</strong><br><br>
-    次のステップ👇<br>
-    1. 下の「SeaArtで開く」をタップ<br>
-    2. img2img を選ぶ<br>
-    3. 写真をアップ<br>
-    4. プロンプトを貼る<br>
-    5. 生成する
+    下のサービスを選んでタップ👇<br>
+    img2imgに写真をアップして貼り付けて生成！
   </p>
 </div>
 
-<div class="btn-row" id="action-btns" style="display:none;">
+<!-- サービス選択 -->
+<div class="service-section" id="service-section">
+  <div class="service-label">どこで生成する？（クレジット残量メモ）</div>
+  <div class="service-grid" id="service-grid"></div>
+</div>
+
+<div class="btn-row" id="copy-btn-row" style="display:none;">
   <button class="btn" onclick="copyPrompt()">もう一度コピー</button>
-  <button class="btn success" onclick="openSeaArt()">SeaArtで開く →</button>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 let imageLoaded = false;
+const state = { targets: new Set(), style: null, mood: null };
 
-const state = {
-  targets: new Set(),
-  style: null,
-  mood: null
-};
+const DEFAULT_NEGATIVE = 'low quality, blurry, deformed, bad anatomy, extra fingers, extra limbs, distorted face, overedited skin, unrealistic body, duplicate, watermark, text, logo, cropped, out of frame';
 
-const DEFAULT_NEGATIVE =
-  'low quality, blurry, deformed, bad anatomy, extra fingers, extra limbs, distorted face, overedited skin, unrealistic body, duplicate, watermark, text, logo, cropped, out of frame';
+const SERVICES = [
+  { id: 'seaart',    name: 'SeaArt',      url: 'https://www.seaart.ai/tools/img2img',                         defaultCredit: 50  },
+  { id: 'leonardo',  name: 'Leonardo AI', url: 'https://app.leonardo.ai/',                                    defaultCredit: 150 },
+  { id: 'yeri',      name: 'yeri.ai',     url: 'https://yeri.ai/ja/app/image-to-image',                       defaultCredit: 9   },
+  { id: 'nightcafe', name: 'NightCafe',   url: 'https://creator.nightcafe.studio/create/img2img',             defaultCredit: 5   },
+];
+
+// クレジット読み込み
+function loadCredits() {
+  const saved = localStorage.getItem('service_credits');
+  return saved ? JSON.parse(saved) : {};
+}
+
+function saveCredits(credits) {
+  localStorage.setItem('service_credits', JSON.stringify(credits));
+}
+
+// サービスカード生成
+function buildServiceCards() {
+  const credits = loadCredits();
+  const grid = document.getElementById('service-grid');
+  grid.innerHTML = '';
+
+  SERVICES.forEach(svc => {
+    const current = credits[svc.id] !== undefined ? credits[svc.id] : svc.defaultCredit;
+    const isLow = current <= 3;
+
+    const card = document.createElement('div');
+    card.className = 'service-card';
+    card.innerHTML = `
+      <div class="service-name">${svc.name}</div>
+      <div class="service-credit-row">
+        <input type="number" class="service-credit-input" id="credit-${svc.id}" value="${current}" min="0" max="9999">
+        <span class="credit-label">クレジット</span>
+      </div>
+      <div class="credit-warn" id="warn-${svc.id}" style="${isLow ? 'display:block' : 'display:none'}">残量少ない！</div>
+    `;
+
+    // クレジット変更時に保存
+    card.querySelector(`#credit-${svc.id}`).addEventListener('input', (e) => {
+      e.stopPropagation();
+      const val = parseInt(e.target.value) || 0;
+      const allCredits = loadCredits();
+      allCredits[svc.id] = val;
+      saveCredits(allCredits);
+      document.getElementById(`warn-${svc.id}`).style.display = val <= 3 ? 'block' : 'none';
+    });
+
+    // カードタップでサービスを開く
+    card.addEventListener('click', (e) => {
+      if (e.target.tagName === 'INPUT') return;
+      copyPrompt();
+      window.open(svc.url, '_blank');
+    });
+
+    grid.appendChild(card);
+  });
+}
 
 document.getElementById('file-input').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
-
-  if (!file.type.startsWith('image/')) {
-    showToast('画像ファイルを選んでください');
-    return;
-  }
-
+  if (!file.type.startsWith('image/')) { showToast('画像ファイルを選んでください'); return; }
   try {
     const dataUrl = await readFileAsDataURL(file);
     const preview = document.getElementById('preview');
@@ -321,70 +313,41 @@ document.getElementById('file-input').addEventListener('change', async (e) => {
     resetOutput();
     checkReady();
     showToast('画像を読み込みました');
-  } catch (e) {
-    showToast('画像の読み込みに失敗しました');
-  }
+  } catch (e) { showToast('画像の読み込みに失敗しました'); }
 });
 
 document.querySelectorAll('[data-cat="target"]').forEach(chip => {
   chip.addEventListener('click', () => {
     const val = chip.dataset.val;
     const allChip = document.querySelector('[data-cat="target"][data-val="all"]');
-
     if (val === 'all') {
-      if (state.targets.has('all')) {
-        state.targets.clear();
-        allChip.classList.remove('selected');
-      } else {
+      if (state.targets.has('all')) { state.targets.clear(); allChip.classList.remove('selected'); }
+      else {
         state.targets.clear();
         document.querySelectorAll('[data-cat="target"]').forEach(c => c.classList.remove('selected'));
-        state.targets.add('all');
-        allChip.classList.add('selected');
+        state.targets.add('all'); allChip.classList.add('selected');
       }
     } else {
-      if (state.targets.has('all')) {
-        state.targets.delete('all');
-        allChip.classList.remove('selected');
-      }
-
-      if (state.targets.has(val)) {
-        state.targets.delete(val);
-        chip.classList.remove('selected');
-      } else {
-        state.targets.add(val);
-        chip.classList.add('selected');
-      }
+      if (state.targets.has('all')) { state.targets.delete('all'); allChip.classList.remove('selected'); }
+      if (state.targets.has(val)) { state.targets.delete(val); chip.classList.remove('selected'); }
+      else { state.targets.add(val); chip.classList.add('selected'); }
     }
-
-    resetOutput();
-    checkReady();
+    resetOutput(); checkReady();
   });
 });
 
 document.querySelectorAll('[data-cat="style"]').forEach(chip => {
   chip.addEventListener('click', () => {
-    if (state.style === chip.dataset.val) {
-      state.style = null;
-      chip.classList.remove('selected');
-    } else {
-      document.querySelectorAll('[data-cat="style"]').forEach(c => c.classList.remove('selected'));
-      state.style = chip.dataset.val;
-      chip.classList.add('selected');
-    }
+    if (state.style === chip.dataset.val) { state.style = null; chip.classList.remove('selected'); }
+    else { document.querySelectorAll('[data-cat="style"]').forEach(c => c.classList.remove('selected')); state.style = chip.dataset.val; chip.classList.add('selected'); }
     resetOutput();
   });
 });
 
 document.querySelectorAll('[data-cat="mood"]').forEach(chip => {
   chip.addEventListener('click', () => {
-    if (state.mood === chip.dataset.val) {
-      state.mood = null;
-      chip.classList.remove('selected');
-    } else {
-      document.querySelectorAll('[data-cat="mood"]').forEach(c => c.classList.remove('selected'));
-      state.mood = chip.dataset.val;
-      chip.classList.add('selected');
-    }
+    if (state.mood === chip.dataset.val) { state.mood = null; chip.classList.remove('selected'); }
+    else { document.querySelectorAll('[data-cat="mood"]').forEach(c => c.classList.remove('selected')); state.mood = chip.dataset.val; chip.classList.add('selected'); }
     resetOutput();
   });
 });
@@ -399,7 +362,8 @@ function checkReady() {
 function resetOutput() {
   document.getElementById('prompt-box').style.display = 'none';
   document.getElementById('guide-box').style.display = 'none';
-  document.getElementById('action-btns').style.display = 'none';
+  document.getElementById('service-section').style.display = 'none';
+  document.getElementById('copy-btn-row').style.display = 'none';
   document.getElementById('prompt-display').textContent = '';
   document.getElementById('negative-display').textContent = DEFAULT_NEGATIVE;
 }
@@ -418,52 +382,32 @@ function mapTargetsToPrompt(targets) {
 function buildPrompt() {
   const targets = [...state.targets];
   const targetPrompt = mapTargetsToPrompt(targets).join(', ');
-
   const style = state.style || 'realistic fashionable styling';
   const mood = state.mood || 'natural and flattering atmosphere';
   const colorText = document.getElementById('color-input').value.trim();
   const customText = document.getElementById('custom-input').value.trim();
-
   const colorPrompt = colorText ? `${colorText} color palette` : '';
-  const customPrompt = customText ? customText : '';
-
-  const fixedParts = [
-    'best quality',
-    'realistic photo',
-    'high detail',
-    'preserve the same person',
-    'keep facial identity',
-    'natural skin texture',
-    'balanced lighting',
-    'clean composition',
-    targetPrompt,
-    style,
-    mood,
-    colorPrompt,
-    customPrompt
-  ].filter(Boolean);
-
-  return fixedParts.join(', ');
+  return [
+    'best quality', 'realistic photo', 'high detail',
+    'preserve the same person', 'keep facial identity',
+    'natural skin texture', 'balanced lighting', 'clean composition',
+    targetPrompt, style, mood, colorPrompt, customText
+  ].filter(Boolean).join(', ');
 }
 
 async function generatePrompt() {
-  if (!imageLoaded) {
-    showToast('先に画像を入れてください');
-    return;
-  }
-
-  if (state.targets.size === 0) {
-    showToast('何を変えるか選んでください');
-    return;
-  }
+  if (!imageLoaded) { showToast('先に画像を入れてください'); return; }
+  if (state.targets.size === 0) { showToast('何を変えるか選んでください'); return; }
 
   const prompt = buildPrompt();
-
   document.getElementById('prompt-display').textContent = prompt;
   document.getElementById('negative-display').textContent = DEFAULT_NEGATIVE;
   document.getElementById('prompt-box').style.display = 'block';
   document.getElementById('guide-box').style.display = 'block';
-  document.getElementById('action-btns').style.display = 'flex';
+  document.getElementById('copy-btn-row').style.display = 'flex';
+
+  buildServiceCards();
+  document.getElementById('service-section').style.display = 'block';
 
   await copyText(prompt);
   showToast('プロンプトを自動コピーしました！');
@@ -471,22 +415,9 @@ async function generatePrompt() {
 
 async function copyPrompt() {
   const text = document.getElementById('prompt-display').textContent;
-  if (!text) {
-    showToast('コピーするプロンプトがありません');
-    return;
-  }
+  if (!text) { showToast('先にプロンプトを作成してください'); return; }
   await copyText(text);
   showToast('コピーしました！');
-}
-
-async function openSeaArt() {
-  const text = document.getElementById('prompt-display').textContent;
-  if (!text) {
-    showToast('先にプロンプトを作成してください');
-    return;
-  }
-  await copyText(text);
-  window.open('https://www.seaart.ai/tools/img2img', '_blank');
 }
 
 function readFileAsDataURL(file) {
@@ -499,26 +430,20 @@ function readFileAsDataURL(file) {
 }
 
 async function copyText(text) {
-  try {
-    await navigator.clipboard.writeText(text);
-  } catch (e) {
+  try { await navigator.clipboard.writeText(text); }
+  catch (e) {
     const ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
   }
 }
 
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+  t.textContent = msg; t.classList.add('show');
   clearTimeout(showToast._timer);
   showToast._timer = setTimeout(() => t.classList.remove('show'), 2500);
 }
 </script>
-
 </body>
 </html>
