@@ -206,8 +206,11 @@ ${styleHint}
     const data = await response.json();
     if (data.error) throw new Error(data.error.message);
 
-    const raw = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
-    const result = JSON.parse(raw);
+let raw = data.candidates[0].content.parts[0].text;
+raw = raw.replace(/```json/g, '').replace(/```/g, '').trim();
+const jsonMatch = raw.match(/\{[\s\S]*\}/);
+if (!jsonMatch) throw new Error('JSONが見つかりません');
+const result = JSON.parse(jsonMatch[0]);
 
     document.getElementById('analysis-box').style.display = 'block';
     document.getElementById('analysis-text').textContent = result.analysis;
